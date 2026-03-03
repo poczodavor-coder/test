@@ -70,6 +70,8 @@ def gameLoop():
 
     snake_List = []
     Length_of_snake = 1
+    
+    flash_frames = 0
 
     # 随机生成第一个食物位置
     foodx = round(random.randrange(0, WIDTH - snake_block) / float(snake_block)) * snake_block
@@ -119,7 +121,12 @@ def gameLoop():
         
         x1 += x1_change
         y1 += y1_change
-        dis.fill(BLACK)
+        
+        if flash_frames > 0:
+            dis.fill(WHITE)
+            flash_frames -= 1
+        else:
+            dis.fill(BLACK)
         
         # 画食物
         pygame.draw.rect(dis, RED, [foodx, foody, snake_block, snake_block])
@@ -149,6 +156,10 @@ def gameLoop():
             foodx = round(random.randrange(0, WIDTH - snake_block) / float(snake_block)) * snake_block
             foody = round(random.randrange(0, HEIGHT - snake_block) / float(snake_block)) * snake_block
             Length_of_snake += 1
+            
+            score = Length_of_snake - 1
+            if score > 0 and score % 5 == 0:
+                flash_frames = 4
 
         clock.tick(snake_speed)
 
