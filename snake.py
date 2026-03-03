@@ -159,7 +159,7 @@ def gameLoop():
             
             score = Length_of_snake - 1
             if score > 0 and score % 5 == 0:
-                flash_frames = 4
+                flash_frames = 2
 
         clock.tick(snake_speed)
 
