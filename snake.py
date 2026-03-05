@@ -2,9 +2,35 @@ import pygame
 import time
 import random
 import sys
+import math
+import struct
+import wave
+import io
 
 # 初始化 pygame
 pygame.init()
+pygame.mixer.init(frequency=22050, size=-16, channels=1, buffer=512)
+
+def generate_sound(frequency=440, duration=0.15, volume=0.5, sample_rate=22050):
+    """通过正弦波动态生成音效，无需外部音频文件"""
+    n_samples = int(sample_rate * duration)
+    buf = io.BytesIO()
+    with wave.open(buf, 'wb') as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        for i in range(n_samples):
+            # 使用衰减包络让声音更自然
+            envelope = max(0, 1.0 - (i / n_samples) * 1.5)
+            val = int(volume * 32767 * envelope * math.sin(2 * math.pi * frequency * i / sample_rate))
+            wf.writeframes(struct.pack('<h', max(-32768, min(32767, val))))
+    buf.seek(0)
+    return pygame.mixer.Sound(buf)
+
+# 生成音效
+eat_sound = generate_sound(frequency=880, duration=0.1, volume=0.4)       # 吃食物：短促高音
+milestone_sound = generate_sound(frequency=1200, duration=0.3, volume=0.5) # 达到5倍数：成就音
+gameover_sound = generate_sound(frequency=200, duration=0.5, volume=0.6)   # 游戏结束：低沉音
 
 # 定义颜色常量
 WHITE = (255, 255, 255)
@@ -82,6 +108,10 @@ def gameLoop():
 
         while game_close == True:
             dis.fill(BLACK)
+            # 仅在首次进入 game_close 时播放游戏结束音效
+            if not hasattr(gameLoop, '_played_gameover') or not gameLoop._played_gameover:
+                gameover_sound.play()
+                gameLoop._played_gameover = True
             message("输了! 按 Q 退出 或 按 C 重玩", "You Lost! Press Q-Quit or C-Play Again", RED)
             Your_score(Length_of_snake - 1)
             pygame.display.update()
@@ -92,6 +122,7 @@ def gameLoop():
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_c:
+                        gameLoop._played_gameover = False
                         gameLoop()
                         return
                 elif event.type == pygame.QUIT:
@@ -167,10 +198,12 @@ def gameLoop():
             foodx = round(random.randrange(0, WIDTH - snake_block) / float(snake_block)) * snake_block
             foody = round(random.randrange(0, HEIGHT - snake_block) / float(snake_block)) * snake_block
             Length_of_snake += 1
+            eat_sound.play()  # 播放吃食物音效
             
             score = Length_of_snake - 1
             if score > 0 and score % 5 == 0:
                 flash_frames = 2
+                milestone_sound.play()  # 播放成就音效
 
         clock.tick(snake_speed)
 
