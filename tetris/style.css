@@ -1,0 +1,419 @@
+/* ===========================
+   TETRIS — Cyberpunk Neon Theme
+   =========================== */
+
+:root {
+  /* Neon palette */
+  --neon-cyan: #00f0ff;
+  --neon-magenta: #ff00c8;
+  --neon-yellow: #ffe600;
+  --neon-green: #39ff14;
+  --neon-orange: #ff6a00;
+  --neon-red: #ff003c;
+  --neon-blue: #4d4dff;
+  --neon-purple: #b84dff;
+
+  /* Background & surfaces */
+  --bg-dark: #0a0a12;
+  --bg-panel: rgba(10, 10, 22, 0.85);
+  --bg-board: #05050d;
+  --border-glow: rgba(0, 240, 255, 0.25);
+  --grid-line: rgba(0, 240, 255, 0.06);
+
+  /* Text */
+  --text-primary: #e0e8ff;
+  --text-dim: rgba(180, 200, 255, 0.5);
+
+  /* Sizing */
+  --cell-size: 32px;
+  --board-cols: 10;
+  --board-rows: 20;
+  --board-width: calc(var(--cell-size) * var(--board-cols));
+  --board-height: calc(var(--cell-size) * var(--board-rows));
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== Body ===== */
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Radial glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 120vmax;
+  height: 120vmax;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(0,240,255,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Scanline overlay ===== */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ===== Container ===== */
+.container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* ===== Header ===== */
+.game-header {
+  text-align: center;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.title-glow {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 3rem;
+  letter-spacing: 0.25em;
+  color: var(--neon-cyan);
+  text-shadow:
+    0 0 10px var(--neon-cyan),
+    0 0 30px var(--neon-cyan),
+    0 0 60px rgba(0, 240, 255, 0.4);
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+.title-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+}
+
+@keyframes titlePulse {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,240,255,0.4); }
+  50% { opacity: 0.85; text-shadow: 0 0 5px var(--neon-cyan), 0 0 15px var(--neon-cyan), 0 0 30px rgba(0,240,255,0.2); }
+}
+
+/* ===== Game Area Layout ===== */
+.game-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* ===== Panels ===== */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 160px;
+}
+
+.stat-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-radius: 6px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+}
+
+.stat-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.stat-value {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  text-shadow: 0 0 8px rgba(224,232,255,0.3);
+}
+
+/* Preview canvases */
+.hold-box canvas,
+.next-box canvas {
+  display: block;
+  margin: 0 auto;
+  image-rendering: pixelated;
+}
+
+/* Controls help */
+.controls-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 0.65rem;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+
+.controls-box .stat-label {
+  margin-bottom: 10px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  border: 1px solid var(--border-glow);
+  border-radius: 3px;
+  background: rgba(0, 240, 255, 0.05);
+  min-width: 22px;
+  text-align: center;
+}
+
+/* ===== Board ===== */
+.board-wrapper {
+  position: relative;
+}
+
+.board-frame {
+  position: relative;
+  background: var(--bg-board);
+  border: 2px solid var(--border-glow);
+  border-radius: 4px;
+  box-shadow:
+    0 0 20px rgba(0, 240, 255, 0.1),
+    inset 0 0 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+#gameCanvas {
+  display: block;
+}
+
+/* ===== Overlays ===== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 13, 0.92);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  animation: overlayIn 0.3s ease;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlay-content {
+  text-align: center;
+}
+
+.overlay-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: 0.2em;
+  color: var(--neon-cyan);
+  text-shadow:
+    0 0 15px var(--neon-cyan),
+    0 0 40px rgba(0, 240, 255, 0.5);
+  margin-bottom: 16px;
+  animation: titlePulse 2s ease-in-out infinite;
+}
+
+.overlay-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  animation: blink 1.2s step-end infinite;
+}
+
+.overlay-hint {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ===== Mobile Controls ===== */
+.mobile-controls {
+  display: none;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.mobile-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  width: 56px;
+  height: 56px;
+  border: 2px solid var(--neon-cyan);
+  border-radius: 8px;
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--neon-cyan);
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mobile-btn:active {
+  background: rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+  transform: scale(0.93);
+}
+
+.mobile-btn.btn-wide {
+  width: 124px;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+}
+
+/* ===== Particle Canvas ===== */
+#particleCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ===== Line Clear Flash ===== */
+@keyframes lineClear {
+  0% { background: rgba(0, 240, 255, 0.8); }
+  50% { background: rgba(255, 0, 200, 0.6); }
+  100% { background: transparent; }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  :root {
+    --cell-size: 22px;
+  }
+
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .panel {
+    flex-direction: row;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .panel-left {
+    order: -1;
+  }
+
+  .panel-right .controls-box {
+    display: none;
+  }
+
+  .stat-box {
+    min-width: 100px;
+  }
+
+  .mobile-controls {
+    display: flex;
+  }
+
+  .title-glow {
+    font-size: 2rem;
+  }
+
+  .title-sub {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --cell-size: 18px;
+  }
+}

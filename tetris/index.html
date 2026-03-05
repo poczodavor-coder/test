@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="赛博朋克风格俄罗斯方块游戏 - Cyberpunk Tetris">
+  <title>TETRIS // 俄罗斯方块</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Scanline overlay -->
+  <div class="scanlines"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="game-header">
+      <h1 class="title">
+        <span class="title-glow">TETRIS</span>
+        <span class="title-sub">// 俄罗斯方块</span>
+      </h1>
+    </header>
+
+    <!-- Game Area -->
+    <main class="game-area">
+      <!-- Left Panel: Stats -->
+      <aside class="panel panel-left">
+        <div class="stat-box">
+          <div class="stat-label">SCORE // 分数</div>
+          <div class="stat-value" id="score">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">LEVEL // 等级</div>
+          <div class="stat-value" id="level">1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">LINES // 行数</div>
+          <div class="stat-value" id="lines">0</div>
+        </div>
+        <div class="stat-box hold-box">
+          <div class="stat-label">HOLD // 暂存</div>
+          <canvas id="holdCanvas" width="120" height="120"></canvas>
+        </div>
+      </aside>
+
+      <!-- Center: Game Board -->
+      <div class="board-wrapper">
+        <div class="board-frame">
+          <canvas id="gameCanvas"></canvas>
+          <!-- Overlay screens -->
+          <div class="overlay" id="startOverlay">
+            <div class="overlay-content">
+              <div class="overlay-title">TETRIS</div>
+              <div class="overlay-sub">按 ENTER 开始</div>
+              <div class="overlay-hint">← → 移动 &nbsp;|&nbsp; ↑ 旋转 &nbsp;|&nbsp; ↓ 软降 &nbsp;|&nbsp; SPACE 硬降</div>
+            </div>
+          </div>
+          <div class="overlay hidden" id="pauseOverlay">
+            <div class="overlay-content">
+              <div class="overlay-title">PAUSED</div>
+              <div class="overlay-sub">按 P 继续</div>
+            </div>
+          </div>
+          <div class="overlay hidden" id="gameOverOverlay">
+            <div class="overlay-content">
+              <div class="overlay-title">GAME OVER</div>
+              <div class="overlay-sub final-score"></div>
+              <div class="overlay-hint">按 ENTER 重新开始</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Next Piece -->
+      <aside class="panel panel-right">
+        <div class="stat-box next-box">
+          <div class="stat-label">NEXT // 下一个</div>
+          <canvas id="nextCanvas" width="120" height="120"></canvas>
+        </div>
+        <div class="controls-box">
+          <div class="stat-label">CONTROLS // 操作</div>
+          <div class="control-row"><kbd>←</kbd><kbd>→</kbd> 移动</div>
+          <div class="control-row"><kbd>↑</kbd> 旋转</div>
+          <div class="control-row"><kbd>↓</kbd> 软降</div>
+          <div class="control-row"><kbd>SPACE</kbd> 硬降</div>
+          <div class="control-row"><kbd>C</kbd> 暂存</div>
+          <div class="control-row"><kbd>P</kbd> 暂停</div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+      <button class="mobile-btn" id="btnLeft">◀</button>
+      <button class="mobile-btn" id="btnRotate">↻</button>
+      <button class="mobile-btn" id="btnDown">▼</button>
+      <button class="mobile-btn" id="btnRight">▶</button>
+      <button class="mobile-btn btn-wide" id="btnDrop">DROP</button>
+    </div>
+  </div>
+
+  <!-- Particle canvas -->
+  <canvas id="particleCanvas"></canvas>
+
+  <script src="game.js"></script>
+</body>
+
+</html>
