@@ -121,7 +121,7 @@ def gameLoop():
 
         # 暂停状态：显示提示信息，跳过游戏逻辑
         if paused:
-            message("游戏暂停中", "PAUSED - Press SPACE to resume", YELLOW)
+            message("游戏暂停中,按空格继续", "PAUSED - Press SPACE to resume", YELLOW)
             pygame.display.update()
             clock.tick(5)
             continue
