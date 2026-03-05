@@ -59,6 +59,7 @@ def message(msg, english_msg, color):
 def gameLoop():
     game_over = False
     game_close = False
+    paused = False
 
     # 蛇的初始位置
     x1 = round((WIDTH / 2) / snake_block) * snake_block
@@ -101,8 +102,11 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
+                # 按空格键切换暂停状态
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
                 # 阻止蛇直接反向移动
-                if event.key == pygame.K_LEFT and x1_change == 0:
+                elif event.key == pygame.K_LEFT and x1_change == 0:
                     x1_change = -snake_block
                     y1_change = 0
                 elif event.key == pygame.K_RIGHT and x1_change == 0:
@@ -114,6 +118,13 @@ def gameLoop():
                 elif event.key == pygame.K_DOWN and y1_change == 0:
                     y1_change = snake_block
                     x1_change = 0
+
+        # 暂停状态：显示提示信息，跳过游戏逻辑
+        if paused:
+            message("已暂停 - 按空格键继续", "PAUSED - Press SPACE to resume", YELLOW)
+            pygame.display.update()
+            clock.tick(5)
+            continue
 
         # 判断是否撞墙
         if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
