@@ -102,8 +102,8 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                # 按空格键切换暂停状态
-                if event.key == pygame.K_SPACE:
+                # 按 P 键切换暂停状态
+                if event.key == pygame.K_p:
                     paused = not paused
                 # 阻止蛇直接反向移动
                 elif event.key == pygame.K_LEFT and x1_change == 0:
@@ -121,7 +121,7 @@ def gameLoop():
 
         # 暂停状态：显示提示信息，跳过游戏逻辑
         if paused:
-            message("游戏暂停中,按空格继续", "PAUSED - Press SPACE to resume", YELLOW)
+            message("游戏暂停中,按P键继续", "PAUSED - Press P to resume", YELLOW)
             pygame.display.update()
             clock.tick(5)
             continue
