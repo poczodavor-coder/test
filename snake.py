@@ -39,6 +39,7 @@ BLACK = (0, 0, 0)
 RED = (213, 50, 80)
 GREEN = (0, 255, 0)
 BLUE = (50, 153, 213)
+GOLD = (255, 215, 0)
 
 # 设置屏幕大小
 WIDTH = 600
@@ -70,6 +71,14 @@ def Your_score(score):
         value = score_font.render("Score: " + str(score), True, YELLOW)
     dis.blit(value, [10, 10])
 
+def draw_multiplier_hint():
+    """当金色食物存在时，显示加倍提示"""
+    if is_chinese_supported:
+        hint = score_font.render("x2", True, GOLD)
+    else:
+        hint = score_font.render("x2", True, GOLD)
+    dis.blit(hint, [WIDTH - 60, 10])
+
 def our_snake(snake_block, snake_list):
     for x in snake_list:
         pygame.draw.rect(dis, GREEN, [x[0], x[1], snake_block, snake_block])
@@ -97,12 +106,19 @@ def gameLoop():
 
     snake_List = []
     Length_of_snake = 1
+    score = 0
     
     flash_frames = 0
 
     # 随机生成第一个食物位置
     foodx = round(random.randrange(0, WIDTH - snake_block) / float(snake_block)) * snake_block
     foody = round(random.randrange(0, HEIGHT - snake_block) / float(snake_block)) * snake_block
+
+    # 金色食物状态
+    golden_food_active = False
+    golden_foodx = 0
+    golden_foody = 0
+    golden_food_timer = 0  # 金色食物剩余显示帧数
 
     while not game_over:
 
@@ -113,7 +129,7 @@ def gameLoop():
                 gameover_sound.play()
                 gameLoop._played_gameover = True
             message("输了! 按 Q 退出 或 按 C 重玩", "You Lost! Press Q-Quit or C-Play Again", RED)
-            Your_score(Length_of_snake - 1)
+            Your_score(score)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -170,8 +186,15 @@ def gameLoop():
         else:
             dis.fill(BLACK)
         
-        # 画食物
+        # 画普通食物
         pygame.draw.rect(dis, RED, [foodx, foody, snake_block, snake_block])
+        
+        # 画金色食物（比普通食物稍大，更醒目）
+        if golden_food_active:
+            pygame.draw.rect(dis, GOLD, [golden_foodx - 2, golden_foody - 2, snake_block + 4, snake_block + 4])
+            golden_food_timer -= 1
+            if golden_food_timer <= 0:
+                golden_food_active = False
         
         # 记录蛇头的位置信息
         snake_Head = []
@@ -189,7 +212,11 @@ def gameLoop():
                 game_close = True
 
         our_snake(snake_block, snake_List)
-        Your_score(Length_of_snake - 1)
+        Your_score(score)
+        
+        # 如果金色食物存在，显示 x2 提示
+        if golden_food_active:
+            draw_multiplier_hint()
 
         pygame.display.update()
 
@@ -199,11 +226,26 @@ def gameLoop():
             foody = round(random.randrange(0, HEIGHT - snake_block) / float(snake_block)) * snake_block
             Length_of_snake += 1
             eat_sound.play()  # 播放吃食物音效
+            score += 1
             
-            score = Length_of_snake - 1
             if score > 0 and score % 5 == 0:
                 flash_frames = 2
                 milestone_sound.play()  # 播放成就音效
+            
+            # 20% 概率生成金色食物
+            if not golden_food_active and random.random() < 0.2:
+                golden_foodx = round(random.randrange(0, WIDTH - snake_block) / float(snake_block)) * snake_block
+                golden_foody = round(random.randrange(0, HEIGHT - snake_block) / float(snake_block)) * snake_block
+                golden_food_active = True
+                golden_food_timer = 60  # 约5秒（12帧/秒 * 5）
+
+        # 判断是否吃到金色食物（得分加倍：+2）
+        if golden_food_active and x1 == golden_foodx and y1 == golden_foody:
+            Length_of_snake += 1
+            score += 2  # 金色食物得分加倍
+            eat_sound.play()
+            golden_food_active = False
+            flash_frames = 3  # 闪烁提示
 
         clock.tick(snake_speed)
 
